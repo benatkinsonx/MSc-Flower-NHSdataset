@@ -1,0 +1,16 @@
+name: msc-project-env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - ipykernel
+  - python=3.10
+  - pip
+  - pandas
+  - matplotlib
+  - numpy
+  - scikit-learn
+  - pip:
+      - kaggle
+      - flwr[simulation]
+      - flwr-datasets[vision]
