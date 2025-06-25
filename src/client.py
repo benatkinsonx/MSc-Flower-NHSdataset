@@ -12,14 +12,14 @@ df = pd.read_csv("./data/client.csv")
 
 def compute_hist(df, col_name):
     """Compute histogram for a given column"""
-    _, vals = np.histogram(df[col_name])
-    return vals
+    counts, _ = np.histogram(df[col_name])
+    return counts
 
 class FlowerClient(fl.client.NumPyClient):
     """Flower client for federated analytics"""
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, str] # parameters = the received updated global parameters, config = the received training config --> not needed here because we are doing FA not FL
     ) -> Tuple[List[np.ndarray], int, Dict]:
         hist_list = []
         # Execute query locally
