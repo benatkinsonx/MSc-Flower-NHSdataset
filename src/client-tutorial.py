@@ -8,11 +8,12 @@ import pandas as pd
 import flwr as fl
 
 # Load the data
-df = pd.read_csv("./data/gbsg.csv")
+df = pd.read_csv("./data/client.csv")
 
-def compute_mean(df, col_name):
+def compute_hist(df, col_name):
     """Compute histogram for a given column"""
-    return df[col_name].mean()
+    counts, _ = np.histogram(df[col_name])
+    return counts
 
 class FlowerClient(fl.client.NumPyClient):
     """Flower client for federated analytics"""
@@ -20,14 +21,13 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str] # parameters = the received updated global parameters, config = the received training config --> not needed here because we are doing FA not FL
     ) -> Tuple[List[np.ndarray], int, Dict]:
-        # sum_list = []
+        hist_list = []
         # Execute query locally
-        mean = compute_mean(df, 'age')
-        # for col_name in ["sepal length (cm)", "sepal width (cm)"]:
-        #     hist = compute_hist(df, col_name)
-        #     hist_list.append(hist)
+        for col_name in ["sepal length (cm)", "sepal width (cm)"]:
+            hist = compute_hist(df, col_name)
+            hist_list.append(hist)
         return (
-            [np.array([mean])],
+            hist_list,
             len(df),
             {},
         )
