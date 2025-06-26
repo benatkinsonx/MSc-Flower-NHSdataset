@@ -17,20 +17,14 @@ def compute_mean(df, col_name):
 class FlowerClient(fl.client.NumPyClient):
     """Flower client for federated analytics"""
 
-    def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str] # parameters = the received updated global parameters, config = the received training config --> not needed here because we are doing FA not FL
-    ) -> Tuple[List[np.ndarray], int, Dict]:
-        # sum_list = []
-        # Execute query locally
+    # In client.py
+    def fit(self, parameters, config):
+        print(f"Client dataset size: {len(df)}")
+        print(f"First 5 patient IDs: {df.index[:5].tolist()}")
+        print(f"Mean age: {df['age'].mean()}")
+        
         mean = compute_mean(df, 'age')
-        # for col_name in ["sepal length (cm)", "sepal width (cm)"]:
-        #     hist = compute_hist(df, col_name)
-        #     hist_list.append(hist)
-        return (
-            [np.array([mean])],
-            len(df),
-            {},
-        )
+        return ([np.array([mean])], len(df), {})
 
 # Simple tutorial approach
 if __name__ == "__main__":
