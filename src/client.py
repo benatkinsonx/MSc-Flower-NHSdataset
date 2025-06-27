@@ -46,7 +46,11 @@ class FlowerClient(NumPyClient):
         print(f"Mean age: {partition_df['age'].mean()}")
         
         partition_mean = compute_mean(partition_df, 'age')
-        return ([np.array([partition_mean])], len(partition_df), {})
+
+        summarystat = [np.array(partition_mean)]
+        num_examples = len(partition_df)
+        metrics = {}
+        return (summarystat, num_examples, metrics)
 
 def client_fn(context: Context) -> fl.client.Client:
     """Create a Flower client representing a single organization."""
