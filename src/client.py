@@ -7,7 +7,9 @@ import flwr as fl
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 
-# ============== PARTITIONING DATA + DEFINING SUMMARY STATISTIC ==============
+# ============================================================================
+# DATA LOADING & PARTITIONING
+# ============================================================================
 
 # Load data globally
 df = pd.read_csv("./data/gbsg.csv")
@@ -31,11 +33,17 @@ def load_datasets(df, num_partitions: int, client_id: int):
     print(f'client ID: {client_id}, no. of instances: {len(partition_df)}')
     return partition_df
 
+# ============================================================================
+# ANALYTICS FUNCTIONS
+# ============================================================================
+
 def compute_mean(df, col_name):
     """Compute mean for a given column"""
     return df[col_name].mean()
 
-# ============== FLOWER CLIENT ==============
+# ============================================================================
+# FLOWER CLIENT IMPLEMENTATION
+# ============================================================================
 
 class FlowerClient(NumPyClient):
     """Flower client for federated analytics"""
@@ -56,7 +64,9 @@ class FlowerClient(NumPyClient):
         metrics = {}
         return (summarystat, num_examples, metrics)
     
-# ============== CREATE CLIENT APP ==============
+# ============================================================================
+# CLIENT APP CONFIGURATION
+# ============================================================================
 
 def client_fn(context: Context) -> fl.client.Client:
     """Create a Flower client representing a single organization."""
@@ -75,7 +85,9 @@ def client_fn(context: Context) -> fl.client.Client:
 # Create the ClientApp (modern approach)
 client = ClientApp(client_fn=client_fn)
 
-# ============== FOR RUNNING client.py ==============
+# ============================================================================
+# FOR RUNNING client.py (legacy)
+# ============================================================================
 
 # Legacy support for direct execution
 if __name__ == "__main__":
