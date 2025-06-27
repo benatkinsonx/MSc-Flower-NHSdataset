@@ -1,3 +1,5 @@
+# client.py
+
 from typing import List, Dict, Tuple
 import numpy as np
 import pandas as pd
@@ -8,6 +10,8 @@ from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
 import hashlib
 import os
+
+from config import NUM_CLIENTS
 
 # ============================================================================
 # DATA LOADING & PARTITIONING
@@ -54,7 +58,7 @@ class FlowerClient(NumPyClient):
         self.client_id = client_id
 
     def fit(self, parameters, config):
-        partition_df = load_datasets(df, num_partitions=2, client_id=self.client_id)
+        partition_df = load_datasets(df, num_partitions=NUM_CLIENTS, client_id=self.client_id)
         print(f"Client {self.client_id} dataset size: {len(partition_df)}")
         print(f"First 5 patient IDs: {partition_df.index[:5].tolist()}")
         print(f"Mean age: {partition_df['age'].mean()}")
@@ -77,7 +81,6 @@ def client_fn(context: Context) -> fl.client.Client:
     
     if context.node_id not in _node_to_client_mapping:
         # Assign next available client ID
-        NUM_CLIENTS = 2
         _node_to_client_mapping[context.node_id] = len(_node_to_client_mapping) % NUM_CLIENTS
     
     client_id = _node_to_client_mapping[context.node_id]

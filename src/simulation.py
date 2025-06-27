@@ -1,12 +1,14 @@
+# simulation.py
+
 import flwr as fl
 from flwr.simulation import run_simulation
 
-# Import your server and client apps
+from config import NUM_CLIENTS
+
+# server and client apps
 from server import server
 from client import client
 
-# Configuration
-NUM_CLIENTS = 2
 
 if __name__ == "__main__":
     # Backend configuration

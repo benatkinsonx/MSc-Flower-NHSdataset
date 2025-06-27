@@ -1,3 +1,5 @@
+# server.py
+
 from typing import List, Tuple, Optional, Dict, Union, Callable
 import numpy as np
 import flwr as fl
@@ -10,52 +12,101 @@ from flwr.common import (
     parameters_to_ndarrays, ndarrays_to_parameters, Context
 )
 
+from config import NUM_CLIENTS, MIN_NUM_CLIENTS, NUM_ROUNDS
+
+# ============================================================================
+# AGGREGATION FUNCTIONS
+# ============================================================================
+
+def aggregate_means(results: List[Tuple[ClientProxy, FitRes]]) -> float:
+    """Aggregate mean values from multiple clients"""
+    values_aggregated = [
+        (parameters_to_ndarrays(fit_res.parameters))[0][0] for _, fit_res in results
+    ]
+    mean_agg = sum(values_aggregated) / NUM_CLIENTS
+    return mean_agg
+
+def create_aggregated_parameters(aggregated_value: float) -> Parameters:
+    """Convert aggregated value back to Flower parameters"""
+    results_array = np.array([aggregated_value])
+    return ndarrays_to_parameters([results_array])
+
+# ============================================================================
+# FEDERATED ANALYTICS STRATEGY
+# ============================================================================
+
 class FedAnalytics(Strategy):
+    """Custom strategy for federated analytics on NHS dataset"""
+    
     def __init__(self):
         super().__init__()
-        self.num_clients = 2
 
     def initialize_parameters(self, client_manager: Optional[ClientManager] = None) -> Optional[Parameters]:
+        """Initialize global parameters (none needed for analytics)"""
         return None
 
     def configure_fit(self, server_round: int, parameters: Parameters, client_manager: ClientManager) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure clients for the fit round"""
         config = {}
         fit_ins = FitIns(parameters, config)
-        clients = client_manager.sample(num_clients=self.num_clients, min_num_clients=2)
+        clients = client_manager.sample(num_clients=NUM_CLIENTS, min_num_clients=MIN_NUM_CLIENTS)
         return [(client, fit_ins) for client in clients]
 
     def aggregate_fit(self, server_round: int, results: List[Tuple[ClientProxy, FitRes]], failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]]) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        values_aggregated = [
-            (parameters_to_ndarrays(fit_res.parameters))[0][0] for _, fit_res in results
-        ]
-        mean_agg = sum(values_aggregated)/self.num_clients
-        results_array = np.array([mean_agg])
-        return ndarrays_to_parameters(results_array), {}
+        """Aggregate results from all clients"""
+        if not results:
+            print("WARNING: No results received from clients")
+            return None, {}
+        
+        # Aggregate the mean values
+        mean_agg = aggregate_means(results)
+        
+        # Convert back to parameters
+        aggregated_params = create_aggregated_parameters(mean_agg)
+        
+        print(f"Aggregated mean age across all clients: {mean_agg:.2f}")
+        return aggregated_params, {}
 
     def evaluate(self, server_round: int, parameters: Parameters) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate the aggregated parameters"""
+        if parameters is None:
+            return 0, {"Aggregated mean age": []}
+        
         agg_mean = [arr.item() for arr in parameters_to_ndarrays(parameters)]
         return 0, {"Aggregated mean age": agg_mean}
 
     def configure_evaluate(self, server_round: int, parameters: Parameters, client_manager: ClientManager) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure clients for evaluation (not used in analytics)"""
         pass
 
     def aggregate_evaluate(self, server_round: int, results: List[Tuple[ClientProxy, EvaluateRes]], failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Aggregate evaluation results (not used in analytics)"""
         pass
 
+# ============================================================================
+# SERVER APP CONFIGURATION
+# ============================================================================
+
 def server_fn(context: Context) -> ServerAppComponents:
-    """Construct components that set the ServerApp behaviour."""
+    """Construct components that set the ServerApp behaviour"""
     strategy = FedAnalytics()
-    config = ServerConfig(num_rounds=1)
+    config = ServerConfig(num_rounds=NUM_ROUNDS)
     return ServerAppComponents(strategy=strategy, config=config)
 
 # Create the ServerApp (modern approach)
 server = ServerApp(server_fn=server_fn)
 
+# ============================================================================
+# FOR RUNNING server.py (legacy)
+# ============================================================================
+
 # Legacy support for direct execution
 if __name__ == "__main__":
+    print(f"Starting federated analytics server with {NUM_CLIENTS} clients for {NUM_ROUNDS} rounds")
+    
     # Use the legacy start_server for direct execution
     fl.server.start_server(
-        server_address="0.0.0.0:8080",
-        config=ServerConfig(num_rounds=1),
-        strategy=FedAnalytics(),
+        server_address='127.0.0.1:8080',
+        config=ServerConfig(num_rounds=NUM_ROUNDS),
+        strategy=FedAnalytics()
     )
