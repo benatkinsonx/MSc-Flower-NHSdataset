@@ -6,6 +6,8 @@ from flwr_datasets.partitioner import IidPartitioner
 import flwr as fl
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
+import hashlib
+import os
 
 # ============================================================================
 # DATA LOADING & PARTITIONING
@@ -59,7 +61,7 @@ class FlowerClient(NumPyClient):
         
         partition_mean = compute_mean(partition_df, 'age')
 
-        summarystat = [np.array(partition_mean)]
+        summarystat = [np.array([partition_mean])]
         num_examples = len(partition_df)
         metrics = {}
         return (summarystat, num_examples, metrics)
@@ -68,18 +70,19 @@ class FlowerClient(NumPyClient):
 # CLIENT APP CONFIGURATION
 # ============================================================================
 
+_node_to_client_mapping = {}
+
 def client_fn(context: Context) -> fl.client.Client:
-    """Create a Flower client representing a single organization."""
+    global _node_to_client_mapping
     
-    # Use hash of node_id to get consistent but different client IDs
-    import hashlib
-    node_str = str(context.node_id)
-    hash_val = int(hashlib.md5(node_str.encode()).hexdigest(), 16)
-    client_id = hash_val % 2  # For 2 partitions
+    if context.node_id not in _node_to_client_mapping:
+        # Assign next available client ID
+        NUM_CLIENTS = 2
+        _node_to_client_mapping[context.node_id] = len(_node_to_client_mapping) % NUM_CLIENTS
     
-    print(f"DEBUG: Node {context.node_id} -> Client ID {client_id}")
+    client_id = _node_to_client_mapping[context.node_id]
+    print(f"DEBUG: Node {context.node_id} -> Client ID {client_id} (deterministic)")
     
-    # Create and return the client
     return FlowerClient(client_id=client_id).to_client()
 
 # Create the ClientApp (modern approach)
@@ -91,7 +94,6 @@ client = ClientApp(client_fn=client_fn)
 
 # Legacy support for direct execution
 if __name__ == "__main__":
-    import os
     client_id = int(os.getenv('CLIENT_ID', '0'))
     
     # Use the legacy start_client for direct execution
