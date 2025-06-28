@@ -24,18 +24,15 @@ def aggregate_weightedavg_summarystat(results: List[Tuple[ClientProxy, FitRes]])
     weights = []
     
     for _, fit_res in results:
-        # Extract the computed value (mean, median, etc.)
-        value = (parameters_to_ndarrays(fit_res.parameters))[0][0]
-        # Extract the number of examples as weight
-        weight = fit_res.num_examples
-        
+        value = (parameters_to_ndarrays(fit_res.parameters))[0][0] # extract summary stat
+        weight = fit_res.num_examples # extract num_examples - to be used as the weight
+        # append those values to the global empty arrays
         values.append(value)
         weights.append(weight)
-    # Weighted average: larger datasets have more influence
-    return np.average(values, weights=weights)
+    return np.average(values, weights=weights) # compute the weighted average
 
 def create_aggregated_parameters(aggregated_value: float) -> Parameters:
-    """Convert aggregated value back to Flower parameters"""
+    """Convert aggregated values (NumPy array) back to Flower parameters"""
     results_array = np.array([aggregated_value])
     return ndarrays_to_parameters([results_array])
 
