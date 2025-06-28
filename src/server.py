@@ -45,15 +45,19 @@ class FedAnalytics(Strategy):
         """Initialize global parameters (none needed for analytics)"""
         return None
 
-    def configure_fit(self, server_round: int, parameters: Parameters, client_manager: ClientManager) -> List[Tuple[ClientProxy, FitIns]]:
+    def configure_fit(self, server_round: int, parameters: Parameters, client_manager: ClientManager
+                      ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure clients for the fit round"""
         config = {}
         fit_ins = FitIns(parameters, config)
         clients = client_manager.sample(num_clients=NUM_CLIENTS, min_num_clients=MIN_NUM_CLIENTS)
         return [(client, fit_ins) for client in clients]
 
-    def aggregate_fit(self, server_round: int, results: List[Tuple[ClientProxy, FitRes]], failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]]) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    def aggregate_fit(self, server_round: int, results: List[Tuple[ClientProxy, FitRes]], 
+                      failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]]
+                      ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate results from all clients"""
+
         if not results:
             print("WARNING: No results received from clients")
             return None, {}
@@ -75,11 +79,14 @@ class FedAnalytics(Strategy):
         agg_mean = [arr.item() for arr in parameters_to_ndarrays(parameters)]
         return 0, {"Aggregated mean age": agg_mean}
 
-    def configure_evaluate(self, server_round: int, parameters: Parameters, client_manager: ClientManager) -> List[Tuple[ClientProxy, EvaluateIns]]:
+    def configure_evaluate(self, server_round: int, parameters: Parameters, client_manager: ClientManager
+                           ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure clients for evaluation (not used in analytics)"""
         pass
 
-    def aggregate_evaluate(self, server_round: int, results: List[Tuple[ClientProxy, EvaluateRes]], failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]) -> Tuple[Optional[float], Dict[str, Scalar]]:
+    def aggregate_evaluate(self, server_round: int, results: List[Tuple[ClientProxy, EvaluateRes]], 
+                           failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]
+                           ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation results (not used in analytics)"""
         pass
 

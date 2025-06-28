@@ -76,7 +76,7 @@ class FlowerClient(NumPyClient):
 
 _node_to_client_mapping = {}
 
-def client_fn(context: Context) -> fl.client.Client:
+def create_client(context: Context) -> fl.client.Client:
     global _node_to_client_mapping
     
     if context.node_id not in _node_to_client_mapping:
@@ -89,7 +89,7 @@ def client_fn(context: Context) -> fl.client.Client:
     return FlowerClient(client_id=client_id).to_client()
 
 # Create the ClientApp (modern approach)
-client = ClientApp(client_fn=client_fn)
+client = ClientApp(client_fn=create_client)
 
 # ============================================================================
 # FOR RUNNING client.py (legacy)
