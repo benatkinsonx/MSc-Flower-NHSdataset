@@ -23,8 +23,7 @@ def aggregate_means(results: List[Tuple[ClientProxy, FitRes]]) -> float:
     values_aggregated = [
         (parameters_to_ndarrays(fit_res.parameters))[0][0] for _, fit_res in results
     ]
-    mean_agg = sum(values_aggregated) / NUM_CLIENTS
-    return mean_agg
+    return np.mean(values_aggregated)
 
 def create_aggregated_parameters(aggregated_value: float) -> Parameters:
     """Convert aggregated value back to Flower parameters"""
