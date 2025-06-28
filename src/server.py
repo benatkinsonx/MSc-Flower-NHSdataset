@@ -31,7 +31,7 @@ def aggregate_weightedavg_summarystat(results: List[Tuple[ClientProxy, FitRes]])
         weights.append(weight)
     return np.average(values, weights=weights) # compute the weighted average
 
-def create_aggregated_parameters(aggregated_value: float) -> Parameters:
+def convert_scalar_to_FlowerParameters(aggregated_value: float) -> Parameters:
     """Convert aggregated values (NumPy array) back to Flower parameters"""
     results_array = np.array([aggregated_value])
     return ndarrays_to_parameters([results_array])
@@ -68,21 +68,21 @@ class FedAnalytics(Strategy):
             return None, {}
         
         # Aggregate the mean values
-        mean_agg = aggregate_weightedavg_summarystat(results)
+        agg_scalar = aggregate_weightedavg_summarystat(results)
         
         # Convert back to parameters
-        aggregated_params = create_aggregated_parameters(mean_agg)
+        agg_FlowerParameter = convert_scalar_to_FlowerParameters(agg_scalar)
         
-        print(f"Aggregated mean age across all clients: {mean_agg:.2f}")
-        return aggregated_params, {}
+        print(f"Aggregated mean age across all clients: {agg_scalar:.2f}")
+        return agg_FlowerParameter, {}
 
     def evaluate(self, server_round: int, parameters: Parameters) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate the aggregated parameters"""
         if parameters is None:
             return 0, {"Aggregated mean age": []}
         
-        agg_mean = [arr.item() for arr in parameters_to_ndarrays(parameters)]
-        return 0, {"Aggregated mean age": agg_mean}
+        agg_scalar = [arr.item() for arr in parameters_to_ndarrays(parameters)]
+        return 0, {"Aggregated mean age": agg_scalar}
 
     def configure_evaluate(self, server_round: int, parameters: Parameters, client_manager: ClientManager
                            ) -> List[Tuple[ClientProxy, EvaluateIns]]:
@@ -99,14 +99,14 @@ class FedAnalytics(Strategy):
 # SERVER APP CONFIGURATION
 # ============================================================================
 
-def server_fn(context: Context) -> ServerAppComponents:
+def create_server_config(context: Context) -> ServerAppComponents:
     """Construct components that set the ServerApp behaviour"""
     strategy = FedAnalytics()
     config = ServerConfig(num_rounds=NUM_ROUNDS)
     return ServerAppComponents(strategy=strategy, config=config)
 
 # Create the ServerApp (modern approach)
-server = ServerApp(server_fn=server_fn)
+server = ServerApp(server_fn=create_server_config)
 
 # ============================================================================
 # FOR RUNNING server.py (legacy)
