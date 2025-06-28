@@ -18,12 +18,21 @@ from config import NUM_CLIENTS, MIN_NUM_CLIENTS, NUM_ROUNDS
 # AGGREGATION FUNCTIONS
 # ============================================================================
 
-def aggregate_means(results: List[Tuple[ClientProxy, FitRes]]) -> float:
-    """Aggregate mean values from multiple clients"""
-    values_aggregated = [
-        (parameters_to_ndarrays(fit_res.parameters))[0][0] for _, fit_res in results
-    ]
-    return np.mean(values_aggregated)
+def aggregate_weightedavg_summarystat(results: List[Tuple[ClientProxy, FitRes]]) -> float:
+    """Aggregate values from multiple clients using weighted average"""
+    values = []
+    weights = []
+    
+    for _, fit_res in results:
+        # Extract the computed value (mean, median, etc.)
+        value = (parameters_to_ndarrays(fit_res.parameters))[0][0]
+        # Extract the number of examples as weight
+        weight = fit_res.num_examples
+        
+        values.append(value)
+        weights.append(weight)
+    # Weighted average: larger datasets have more influence
+    return np.average(values, weights=weights)
 
 def create_aggregated_parameters(aggregated_value: float) -> Parameters:
     """Convert aggregated value back to Flower parameters"""
@@ -62,7 +71,7 @@ class FedAnalytics(Strategy):
             return None, {}
         
         # Aggregate the mean values
-        mean_agg = aggregate_means(results)
+        mean_agg = aggregate_weightedavg_summarystat(results)
         
         # Convert back to parameters
         aggregated_params = create_aggregated_parameters(mean_agg)
