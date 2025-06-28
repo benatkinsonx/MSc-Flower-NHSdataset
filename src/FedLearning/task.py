@@ -7,11 +7,52 @@ from flwr.common import NDArrays
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+import pandas as pd
+from datasets import Dataset
+
+# ============================================================================
+# DATA LOADING & PARTITIONING
+# ============================================================================
+
+# Load data globally
+df = pd.read_csv('../data/gbsg.csv', index_col='Unnamed: 0')
+df = df.drop(['pid'], axis=1)
+
+def load_datasets(df, num_partitions: int, client_id: int):
+    ds = Dataset.from_pandas(df)
+    partitioner = IidPartitioner(num_partitions=num_partitions)
+    partitioner.dataset = ds
+    
+    # Debug information
+    print(f"DEBUG: Requesting partition {client_id} out of {num_partitions} total partitions")
+    print(f"DEBUG: Available partition IDs should be: 0 to {num_partitions-1}")
+    
+    # Ensure client_id is within valid range
+    if client_id >= num_partitions:
+        print(f"WARNING: client_id {client_id} >= num_partitions {num_partitions}, using modulo")
+        client_id = client_id % num_partitions
+    
+    partition = partitioner.load_partition(partition_id=client_id)
+    partition_df = partition.to_pandas()
+
+    X = partition_df.drop(['status'], axis=1)
+    y = partition_df['status']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    print(f'client ID: {client_id}, no. of training instances: {len(X_train)}')
+    return X_train, X_test, y_train, y_test
+
+# ============================================================================
+# MODEL CONFIGURATION
+# ============================================================================
 
 # This information is needed to create a correct scikit-learn model
 NUM_UNIQUE_LABELS = 10  # MNIST has 10 classes
 NUM_FEATURES = 784  # Number of features in MNIST dataset
 
+# ============================================================================
+# PARAMETER MANAGEMENT FUNCTIONS
+# ============================================================================
 
 def get_model_parameters(model: LogisticRegression) -> NDArrays:
     """Returns the parameters of a sklearn LogisticRegression model."""
@@ -34,6 +75,9 @@ def set_model_params(model: LogisticRegression, params: NDArrays) -> LogisticReg
         model.intercept_ = params[1]
     return model
 
+# ============================================================================
+# MODEL CREATION FUNCTIONS
+# ============================================================================
 
 def set_initial_params(model: LogisticRegression) -> None:
     """Sets initial parameters as zeros Required since model params are uninitialized
@@ -59,25 +103,3 @@ def create_log_reg_and_instantiate_parameters(penalty):
     # Setting initial parameters, akin to model.compile for keras models
     set_initial_params(model)
     return model
-
-
-fds = None  # Cache FederatedDataset
-
-
-def load_data(partition_id: int, num_partitions: int):
-    # Only initialize `FederatedDataset` once
-    global fds
-    if fds is None:
-        partitioner = IidPartitioner(num_partitions=num_partitions)
-        fds = FederatedDataset(
-            dataset="ylecun/mnist",
-            partitioners={"train": partitioner},
-        )
-
-    dataset = fds.load_partition(partition_id, "train").with_format("numpy")
-    X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
-    # Split the on edge data: 80% train, 20% test
-    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
-    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
-
-    return X_train, X_test, y_train, y_test
