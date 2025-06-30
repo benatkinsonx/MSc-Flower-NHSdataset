@@ -16,7 +16,7 @@ from datasets import Dataset
 # ============================================================================
 
 # Load data globally
-df = pd.read_csv('../data/gbsg.csv', index_col='Unnamed: 0')
+df = pd.read_csv('./data/gbsg.csv', index_col='Unnamed: 0')
 df = df.drop(['pid'], axis=1)
 
 def load_datasets(df, num_partitions: int, client_id: int):
@@ -47,8 +47,8 @@ def load_datasets(df, num_partitions: int, client_id: int):
 # ============================================================================
 
 # This information is needed to create a correct scikit-learn model
-NUM_UNIQUE_LABELS = 10  # MNIST has 10 classes
-NUM_FEATURES = 784  # Number of features in MNIST dataset
+NUM_CLASSES = 2
+NUM_FEATURES = len(df.drop(['status'], axis=1).columns)
 
 # ============================================================================
 # PARAMETER MANAGEMENT FUNCTIONS
@@ -86,18 +86,18 @@ def set_initial_params(model: LogisticRegression) -> None:
     But server asks for initial parameters from clients at launch. Refer to
     sklearn.linear_model.LogisticRegression documentation for more information.
     """
-    model.classes_ = np.arange(NUM_UNIQUE_LABELS)
+    model.classes_ = np.array([0,1])
 
-    model.coef_ = np.zeros((NUM_UNIQUE_LABELS, NUM_FEATURES))
+    model.coef_ = np.zeros((1, NUM_FEATURES))
     if model.fit_intercept:
-        model.intercept_ = np.zeros((NUM_UNIQUE_LABELS,))
+        model.intercept_ = np.zeros((1,))
 
 
 def create_log_reg_and_instantiate_parameters(penalty):
     """Helper function to create a LogisticRegression model."""
     model = LogisticRegression(
         penalty=penalty,
-        max_iter=1,  # local epoch
+        max_iter=1,  # client trains for one epoch, sends model updates
         warm_start=True,  # prevent refreshing weights when fitting,
     )
     # Setting initial parameters, akin to model.compile for keras models

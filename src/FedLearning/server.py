@@ -46,7 +46,7 @@ class FedLearning(Strategy):
     def configure_fit(self, server_round: int, parameters: Parameters, client_manager: ClientManager
                       ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure clients for the fit round"""
-        config = {}
+        config = {'penalty':PENALTY}
         fit_ins = FitIns(parameters, config)
         clients = client_manager.sample(num_clients=NUM_CLIENTS, min_num_clients=MIN_NUM_CLIENTS)
         return [(client, fit_ins) for client in clients]
@@ -74,7 +74,7 @@ class FedLearning(Strategy):
     def configure_evaluate(self, server_round: int, parameters: Parameters, client_manager: ClientManager
                            ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure clients for evaluation"""
-        config = {}
+        config = {'penalty': PENALTY}
         evaluate_ins = EvaluateIns(parameters, config)
         clients = client_manager.sample(num_clients=NUM_CLIENTS, min_num_clients=MIN_NUM_CLIENTS)
         return [(client, evaluate_ins) for client in clients]
@@ -89,11 +89,7 @@ class FedLearning(Strategy):
 # SERVER APP CONFIGURATION
 # ============================================================================
 
-# ============================================================================
-# SERVER APP CONFIGURATION
-# ============================================================================
-
-def server_fn(context: Context) -> ServerAppComponents:
+def server_app(context: Context) -> ServerAppComponents:
     """Construct components that set the ServerApp behaviour."""
 
     # Create initial model and get parameters
@@ -109,4 +105,4 @@ def server_fn(context: Context) -> ServerAppComponents:
 
 
 # Create ServerApp
-app = ServerApp(server_fn=server_fn)
+server_app = ServerApp(server_fn=server_app)
