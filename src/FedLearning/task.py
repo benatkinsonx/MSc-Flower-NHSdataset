@@ -46,7 +46,6 @@ def load_datasets(df, num_partitions: int, client_id: int):
 # MODEL CONFIGURATION
 # ============================================================================
 
-# This information is needed to create a correct scikit-learn model
 NUM_CLASSES = 2
 NUM_FEATURES = len(df.drop(['status'], axis=1).columns)
 
