@@ -19,6 +19,7 @@ from task import (
 )
 
 from config import PENALTY
+from task import df
 
 # ============================================================================
 # FLOWER CLIENT IMPLEMENTATION
@@ -49,11 +50,6 @@ class FlowerClient(NumPyClient):
 # ============================================================================
 # CLIENT APP CONFIGURATION
 # ============================================================================
-
-# Load data globally
-df = pd.read_csv('./data/gbsg.csv', index_col='Unnamed: 0')
-df = df.drop(['pid'], axis=1)
-
 def client_app(context: Context) -> Client:
     """Construct a Client that will be run in a ClientApp."""
 
