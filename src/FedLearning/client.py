@@ -59,10 +59,8 @@ def client_app(context: Context) -> Client:
 
     if MODEL_TYPE == 'logistic_regression':
         model = create_log_reg_and_instantiate_parameters(penalty)
-        # Return Client instance
-        return FlowerClient(model, X_train, X_test, y_train, y_test).to_client()
-    else:
-        return f"ERROR: the model '{MODEL_TYPE}' is not compatible with this code. See FedLearning/config.py for a list of the compatible models"
-
+        
+    return FlowerClient(model, X_train, X_test, y_train, y_test).to_client()
+    
 # Create ClientApp
 client_app = ClientApp(client_fn=client_app)
