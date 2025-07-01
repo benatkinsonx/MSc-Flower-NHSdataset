@@ -7,19 +7,15 @@ import warnings
 from flwr.client import Client, ClientApp, NumPyClient
 from flwr.common import Context
 from sklearn.metrics import log_loss
-import pandas as pd
-from datasets import Dataset
-from flwr_datasets.partitioner import IidPartitioner
 
-from task import (
+from models.logistic_regression import (
     create_log_reg_and_instantiate_parameters,
     get_model_parameters,
-    load_datasets,
-    set_model_params,
+    set_model_params
 )
 
-from config import PENALTY
-from task import df
+from config import PENALTY, MODEL_TYPE
+from dataloader import df, load_datasets
 
 # ============================================================================
 # FLOWER CLIENT IMPLEMENTATION
@@ -61,12 +57,12 @@ def client_app(context: Context) -> Client:
     # Read the run config to get settings to configure the Client
     penalty = PENALTY
 
-    # Create LogisticRegression Model
-    model = create_log_reg_and_instantiate_parameters(penalty)
-
-    # Return Client instance
-    return FlowerClient(model, X_train, X_test, y_train, y_test).to_client()
-
+    if MODEL_TYPE == 'logistic_regression':
+        model = create_log_reg_and_instantiate_parameters(penalty)
+        # Return Client instance
+        return FlowerClient(model, X_train, X_test, y_train, y_test).to_client()
+    else:
+        return f"ERROR: the model '{MODEL_TYPE}' is not compatible with this code. See FedLearning/config.py for a list of the compatible models"
 
 # Create ClientApp
 client_app = ClientApp(client_fn=client_app)

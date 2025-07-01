@@ -17,7 +17,7 @@ from flwr.common import (
     parameters_to_ndarrays, ndarrays_to_parameters, Context
 )
 
-from task import (
+from models.logistic_regression import (
     create_log_reg_and_instantiate_parameters,
     get_model_parameters,
     set_initial_params,
