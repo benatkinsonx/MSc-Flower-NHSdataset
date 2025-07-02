@@ -24,7 +24,7 @@ from models.logistic_regression import (
     set_model_params,
 )
 
-from config import NUM_CLIENTS, MIN_NUM_CLIENTS, NUM_ROUNDS, PENALTY
+from config import NUM_CLIENTS, MIN_NUM_CLIENTS, NUM_ROUNDS, PENALTY, MODEL_TYPE
 
 # ============================================================================
 # FEDERATED LEARNING STRATEGY
@@ -104,17 +104,18 @@ class FedLearning(Strategy):
 
 def server_app(context: Context) -> ServerAppComponents:
     """Construct components that set the ServerApp behaviour."""
+    if MODEL_TYPE == 'logistic_regression':
+        # Create initial model and get parameters
+        model = create_log_reg_and_instantiate_parameters(PENALTY)
 
-    # Create initial model and get parameters
-    model = create_log_reg_and_instantiate_parameters(PENALTY)
-    ndarrays = get_model_parameters(model)
-    global_model_init = ndarrays_to_parameters(ndarrays)
+        ndarrays = get_model_parameters(model)
+        global_model_init = ndarrays_to_parameters(ndarrays)
 
-    # Use YOUR custom strategy instead of FedAvg
-    strategy = FedLearning(initial_parameters=global_model_init)
-    config = ServerConfig(num_rounds=NUM_ROUNDS)
+        # Use YOUR custom strategy instead of FedAvg
+        strategy = FedLearning(initial_parameters=global_model_init)
+        config = ServerConfig(num_rounds=NUM_ROUNDS)
 
-    return ServerAppComponents(strategy=strategy, config=config)
+        return ServerAppComponents(strategy=strategy, config=config)
 
 
 # Create ServerApp
