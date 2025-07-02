@@ -2,7 +2,7 @@
 
 To run the flower simulation:
 
-`python src/simulation.py`
+`python src/FedLearning/simulation.py`
 
 Currently the only summary statistic that can be computed is the mean.
 
