@@ -30,13 +30,15 @@ from config import NUM_CLIENTS, MIN_NUM_CLIENTS, NUM_ROUNDS, PENALTY
 # FEDERATED LEARNING STRATEGY
 # ============================================================================
 
+test_loss = []
+test_acc = []
+
 class FedLearning(Strategy):
     """Custom strategy using built-in FedAvg aggregation"""
     
     def __init__(self, initial_parameters: Optional[Parameters] = None):
         super().__init__()
         self.initial_parameters = initial_parameters
-        # Create a FedAvg instance to use its aggregation method
         self.fed_avg = FedAvg()
 
     def initialize_parameters(self, client_manager: Optional[ClientManager] = None) -> Optional[Parameters]:
@@ -68,8 +70,9 @@ class FedLearning(Strategy):
 
     def evaluate(self, server_round: int, parameters: Parameters) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate the aggregated model"""
-        print(f"Round {server_round}: Model aggregated successfully")
-        return 0.0, {"round": server_round}
+        pass
+        # print(f"Round {server_round}: Model aggregated successfully")
+        # return 0.0, {"round": server_round}
 
     def configure_evaluate(self, server_round: int, parameters: Parameters, client_manager: ClientManager
                            ) -> List[Tuple[ClientProxy, EvaluateIns]]:
@@ -83,6 +86,16 @@ class FedLearning(Strategy):
                            failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]
                            ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation results using FedAvg's method"""
+        round_test_loss = []
+        round_test_acc = []
+        for client_proxy, evaluate_res in results:
+            round_test_loss.append(evaluate_res.loss)
+            round_test_acc.append(evaluate_res.metrics['accuracy'])
+
+        test_loss.append(np.mean(round_test_loss))
+        test_acc.append(np.mean(round_test_acc))
+
+
         return self.fed_avg.aggregate_evaluate(server_round, results, failures)
 
 # ============================================================================

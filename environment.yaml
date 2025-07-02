@@ -16,3 +16,4 @@ dependencies:
       - flwr-datasets[vision]
       - python-dotenv
       - torch
+      - xgboost
