@@ -76,20 +76,31 @@ class FlowerClient(NumPyClient):
 
 _node_to_client_mapping = {}
 
-def create_client(context: Context) -> fl.client.Client:
-    global _node_to_client_mapping
+# def create_client(context: Context) -> fl.client.Client:
+#     global _node_to_client_mapping
     
-    if context.node_id not in _node_to_client_mapping:
-        # Assign next available client ID
-        _node_to_client_mapping[context.node_id] = len(_node_to_client_mapping) % NUM_CLIENTS
+#     if context.node_id not in _node_to_client_mapping:
+#         # Assign next available client ID
+#         _node_to_client_mapping[context.node_id] = len(_node_to_client_mapping) % NUM_CLIENTS
     
-    client_id = _node_to_client_mapping[context.node_id]
-    print(f"DEBUG: Node {context.node_id} -> Client ID {client_id} (deterministic)")
+#     client_id = _node_to_client_mapping[context.node_id]
+#     print(f"DEBUG: Node {context.node_id} -> Client ID {client_id} (deterministic)")
     
-    return FlowerClient(client_id=client_id).to_client()
+#     return FlowerClient(client_id=client_id).to_client()
+
+def client_app(context: Context) -> fl.client.Client:
+    """Construct a Client that will be run in a ClientApp."""
+    
+    # Use Flower's node_config approach for deterministic partition assignment
+    partition_id = context.node_config.get("partition-id", 0)
+    num_partitions = context.node_config.get("num-partitions", NUM_CLIENTS)
+    
+    print(f"DEBUG: Using partition_id={partition_id} from node_config")
+    
+    return FlowerClient(client_id=partition_id).to_client()
 
 # Create the ClientApp (modern approach)
-client = ClientApp(client_fn=create_client)
+client = ClientApp(client_fn=client_app)
 
 # ============================================================================
 # FOR RUNNING client.py (legacy)
