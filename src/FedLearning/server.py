@@ -88,12 +88,20 @@ class FedLearning(Strategy):
         """Aggregate evaluation results using FedAvg's method"""
         round_test_loss = []
         round_test_acc = []
+        test_set_sizes = []
+        
         for client_proxy, evaluate_res in results:
             round_test_loss.append(evaluate_res.loss)
             round_test_acc.append(evaluate_res.metrics['accuracy'])
-
-        test_loss.append(np.mean(round_test_loss))
-        test_acc.append(np.mean(round_test_acc))
+            test_set_sizes.append(evaluate_res.num_examples)  # This is the test set size
+        
+        total_test_samples = sum(test_set_sizes)
+        
+        weighted_loss = sum(loss * size for loss, size in zip(round_test_loss, test_set_sizes)) / total_test_samples
+        weighted_accuracy = sum(acc * size for acc, size in zip(round_test_acc, test_set_sizes)) / total_test_samples
+        
+        test_loss.append(weighted_loss)
+        test_acc.append(weighted_accuracy)
 
 
         return self.fed_avg.aggregate_evaluate(server_round, results, failures)

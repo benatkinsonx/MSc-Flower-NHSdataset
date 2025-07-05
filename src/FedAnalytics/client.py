@@ -57,19 +57,34 @@ class FlowerClient(NumPyClient):
     def __init__(self, client_id: int):
         self.client_id = client_id
 
+    # no diff priv
+    # def fit(self, parameters, config):
+    #     partition_df = load_datasets(df, num_partitions=NUM_CLIENTS, client_id=self.client_id)
+    #     print(f"Client {self.client_id} dataset size: {len(partition_df)}")
+    #     print(f"First 5 patient IDs: {partition_df.index[:5].tolist()}")
+    #     print(f"Mean age: {partition_df['age'].mean()}")
+        
+    #     partition_mean = compute_mean(partition_df, 'age')
+
+    #     summarystat = [np.array([partition_mean])]
+    #     num_examples = len(partition_df)
+    #     metrics = {}
+    #     return (summarystat, num_examples, metrics)
+
+    # yes diff priv
     def fit(self, parameters, config):
         partition_df = load_datasets(df, num_partitions=NUM_CLIENTS, client_id=self.client_id)
-        print(f"Client {self.client_id} dataset size: {len(partition_df)}")
-        print(f"First 5 patient IDs: {partition_df.index[:5].tolist()}")
-        print(f"Mean age: {partition_df['age'].mean()}")
-        
         partition_mean = compute_mean(partition_df, 'age')
-
-        summarystat = [np.array([partition_mean])]
-        num_examples = len(partition_df)
-        metrics = {}
-        return (summarystat, num_examples, metrics)
-    
+        
+        # Add local differential privacy
+        epsilon = config.get('epsilon', 10.0)
+        sensitivity = 60.0 / len(partition_df)  # age range / partition size
+        noise = np.random.laplace(0, sensitivity / epsilon)
+        noisy_mean = partition_mean + noise
+        
+        summarystat = [np.array([noisy_mean])]
+        return (summarystat, len(partition_df), {})
+        
 # ============================================================================
 # CLIENT APP CONFIGURATION
 # ============================================================================
