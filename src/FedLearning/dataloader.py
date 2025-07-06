@@ -4,6 +4,7 @@ import numpy as np
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
 from datasets import Dataset
 
@@ -34,7 +35,11 @@ def load_datasets(df, num_partitions: int, client_id: int):
 
     X = partition_df.drop(['status'], axis=1)
     y = partition_df['status']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
     print(f'client ID: {client_id}, no. of training instances: {len(X_train)}')
     return X_train, X_test, y_train, y_test
 

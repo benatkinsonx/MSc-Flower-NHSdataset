@@ -35,6 +35,10 @@ class FlowerClient(NumPyClient):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.model.fit(self.X_train, self.y_train)
+
+        # updated_params = get_model_parameters(self.model)
+        
+
         return get_model_parameters(self.model), len(self.X_train), {}
 
     def evaluate(self, parameters, config):
