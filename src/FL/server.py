@@ -46,9 +46,13 @@ class FedLearning(Strategy):
         return self.initial_parameters
 
     def configure_fit(self, server_round: int, parameters: Parameters, client_manager: ClientManager
-                      ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configure clients for the fit round"""
-        config = {'penalty':PENALTY}
+                    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure clients for the fit round with DP settings"""
+        config = {
+            'epsilon': 2.0,        # Privacy budget per round
+            'data_norm': 5.0,      # Set based on domain knowledge
+            # Remove 'penalty' - DiffPrivLib only supports L2
+        }
         fit_ins = FitIns(parameters, config)
         clients = client_manager.sample(num_clients=NUM_CLIENTS, min_num_clients=MIN_NUM_CLIENTS)
         return [(client, fit_ins) for client in clients]
@@ -75,13 +79,15 @@ class FedLearning(Strategy):
         # return 0.0, {"round": server_round}
 
     def configure_evaluate(self, server_round: int, parameters: Parameters, client_manager: ClientManager
-                           ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+                       ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure clients for evaluation"""
-        config = {'penalty': PENALTY}
+        config = {
+            'epsilon': 2.0,        # Same config for consistency
+            'data_norm': 5.0,
+        }
         evaluate_ins = EvaluateIns(parameters, config)
         clients = client_manager.sample(num_clients=NUM_CLIENTS, min_num_clients=MIN_NUM_CLIENTS)
         return [(client, evaluate_ins) for client in clients]
-
     def aggregate_evaluate(self, server_round: int, results: List[Tuple[ClientProxy, EvaluateRes]], 
                            failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]
                            ) -> Tuple[Optional[float], Dict[str, Scalar]]:
@@ -113,18 +119,19 @@ class FedLearning(Strategy):
 def server_app(context: Context) -> ServerAppComponents:
     """Construct components that set the ServerApp behaviour."""
     if MODEL_TYPE == 'logistic_regression':
-        # Create initial model and get parameters
-        model = create_log_reg_and_instantiate_parameters(PENALTY)
+        # Create initial model with DP settings
+        model = create_log_reg_and_instantiate_parameters(
+            epsilon=1.0,  # This won't be used for training, just initialization
+            data_norm=5.0  # Set based on domain knowledge
+        )
 
         ndarrays = get_model_parameters(model)
         global_model_init = ndarrays_to_parameters(ndarrays)
 
-        # Use YOUR custom strategy instead of FedAvg
         strategy = FedLearning(initial_parameters=global_model_init)
         config = ServerConfig(num_rounds=NUM_ROUNDS)
 
         return ServerAppComponents(strategy=strategy, config=config)
-
-
+    
 # Create ServerApp
 server_app = ServerApp(server_fn=server_app)

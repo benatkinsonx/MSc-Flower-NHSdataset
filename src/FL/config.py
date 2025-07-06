@@ -6,3 +6,6 @@ PENALTY = "l2"
 FRACTION_FIT = 0.5
 # models available: "logistic_regression"
 MODEL_TYPE = "logistic_regression"
+
+EPSILON = 1.0
+DATA_NORM = 10
