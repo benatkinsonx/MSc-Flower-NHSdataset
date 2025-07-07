@@ -4,7 +4,7 @@ from flwr.simulation import run_simulation
 import matplotlib.pyplot as plt
 import numpy as np
 
-from config import NUM_CLIENTS, MODEL_TYPE
+from config import NUM_CLIENTS, MODEL_TYPE, C, DATA_NORM, EPSILON, ITER_PER_ROUND
 from server import server_app, test_acc, test_loss
 from client import client_app
 
@@ -19,6 +19,13 @@ if __name__ == "__main__":
         num_supernodes=NUM_CLIENTS,
         backend_config=backend_config,
     )
+
+# Create filename base
+filename_base = f'DP_federated_{MODEL_TYPE}_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}'
+
+# Save individual arrays
+np.save(f'{filename_base}_accuracy.npy', test_acc)
+np.save(f'{filename_base}_loss.npy', test_loss)
 
 # ============================================================================
 # PLOT METRICS
@@ -40,7 +47,7 @@ plt.tick_params(axis='both', which='minor', length=4, color='gray', labelsize=18
 plt.tick_params(axis='both', which='major', length=6, color='black', labelsize=18)
 plt.tick_params(top=True, right=True, direction='in', length=6)
 plt.tick_params(which='minor', top=True, right=True, direction='in', length=4)
-plt.savefig(f'federated_{MODEL_TYPE}_accuracy_{NUM_CLIENTS}clients.pdf', format='pdf', bbox_inches='tight')
+plt.savefig(f'DP federated_{MODEL_TYPE}_accuracy_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}.pdf', format='pdf', bbox_inches='tight')
 
 plt.figure(2, figsize=(10, 6))
 plt.plot(training_round, test_loss)
@@ -55,6 +62,6 @@ plt.tick_params(axis='both', which='minor', length=4, color='gray', labelsize=18
 plt.tick_params(axis='both', which='major', length=6, color='black', labelsize=18)
 plt.tick_params(top=True, right=True, direction='in', length=6)
 plt.tick_params(which='minor', top=True, right=True, direction='in', length=4)
-plt.savefig(f'federated_{MODEL_TYPE}_loss_{NUM_CLIENTS}clients.pdf', format='pdf', bbox_inches='tight')
+plt.savefig(f'DP federated_{MODEL_TYPE}_loss_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}.pdf', format='pdf', bbox_inches='tight')
 
 plt.show()

@@ -67,7 +67,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dataloader import NUM_FEATURES
-from config import EPSILON, DATA_NORM
+from config import EPSILON, DATA_NORM, C, ITER_PER_ROUND
 
 def get_model_parameters(model: LogisticRegression) -> NDArrays:
     """Returns the parameters of a sklearn LogisticRegression model."""
@@ -117,8 +117,8 @@ def create_log_reg_and_instantiate_parameters(penalty=None, epsilon=EPSILON, dat
     model = LogisticRegression(
         epsilon=epsilon,           # ← Now properly defined
         data_norm=data_norm,       # ← Now properly defined  
-        C=1.0,                     # Regularization (fixed)
-        max_iter=1,                # Client trains for one iteration
+        C=C,                     # Regularization (fixed)
+        max_iter=ITER_PER_ROUND,                # Client trains for one iteration
         warm_start=True,           # Prevent refreshing weights
         fit_intercept=True,        # Include bias term
         verbose=0,                 # No verbose output

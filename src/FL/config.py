@@ -7,5 +7,8 @@ FRACTION_FIT = 0.5
 # models available: "logistic_regression"
 MODEL_TYPE = "logistic_regression"
 
-EPSILON = 1.0
-DATA_NORM = 10
+# epsilon=10 and data_norm=20 give best result
+EPSILON = 10.0
+DATA_NORM = 20
+C = 0.25
+ITER_PER_ROUND = 1
