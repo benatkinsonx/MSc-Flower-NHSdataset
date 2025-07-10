@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fl-dp-logreg"
+version = "1.0.0"
+description = ""
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.19.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "scikit-learn>=1.6.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "BenAtkinson"
+
+[tool.flwr.app.components]
+serverapp = "fl_dp_logreg.server_app:app"
+clientapp = "fl_dp_logreg.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 100
+penalty = "l2"
+local-epochs = 1
+epsilon = 80 # for ibm dp log reg
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 2 # default was 10

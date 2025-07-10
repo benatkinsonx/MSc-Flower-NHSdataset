@@ -1,5 +1,5 @@
 # config.py
-NUM_CLIENTS = 10
+NUM_CLIENTS = 4
 MIN_NUM_CLIENTS = 3
 NUM_ROUNDS = 100
 PENALTY = "l2"
@@ -10,5 +10,5 @@ MODEL_TYPE = "logistic_regression"
 # epsilon=10 and data_norm=20 give best result
 EPSILON = 10.0
 DATA_NORM = 20
-C = 1000000
+C = 0.25
 ITER_PER_ROUND = 1
