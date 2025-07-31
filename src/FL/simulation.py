@@ -21,7 +21,7 @@ if __name__ == "__main__":
     )
 
 # Create filename base
-filename_base = f'DP_federated_{MODEL_TYPE}_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}'
+filename_base = f'logDP_federated_{MODEL_TYPE}_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}'
 
 # Save individual arrays
 np.save(f'{filename_base}_accuracy.npy', test_acc)
@@ -47,7 +47,7 @@ plt.tick_params(axis='both', which='minor', length=4, color='gray', labelsize=18
 plt.tick_params(axis='both', which='major', length=6, color='black', labelsize=18)
 plt.tick_params(top=True, right=True, direction='in', length=6)
 plt.tick_params(which='minor', top=True, right=True, direction='in', length=4)
-plt.savefig(f'DP federated_{MODEL_TYPE}_accuracy_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}.pdf', format='pdf', bbox_inches='tight')
+# plt.savefig(f'logDP federated_{MODEL_TYPE}_accuracy_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}.pdf', format='pdf', bbox_inches='tight')
 
 plt.figure(2, figsize=(10, 6))
 plt.plot(training_round, test_loss)
@@ -62,6 +62,6 @@ plt.tick_params(axis='both', which='minor', length=4, color='gray', labelsize=18
 plt.tick_params(axis='both', which='major', length=6, color='black', labelsize=18)
 plt.tick_params(top=True, right=True, direction='in', length=6)
 plt.tick_params(which='minor', top=True, right=True, direction='in', length=4)
-plt.savefig(f'DP federated_{MODEL_TYPE}_loss_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}.pdf', format='pdf', bbox_inches='tight')
+# plt.savefig(f'logDP federated_{MODEL_TYPE}_loss_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}.pdf', format='pdf', bbox_inches='tight')
 
 plt.show()
