@@ -66,33 +66,24 @@ class FedAnalytics(Strategy):
         if not results:
             print("WARNING: No results received from clients")
             return None, {}
-        
-        # Aggregate the mean values
-        agg_scalar = aggregate_weightedavg_summarystat(results)
-        
-        # Convert back to parameters
-        agg_FlowerParameter = convert_scalar_to_FlowerParameters(agg_scalar)
-        
-        print(f"Aggregated mean age across all clients: {agg_scalar:.2f}")
-        return agg_FlowerParameter, {}
-
-    def evaluate(self, server_round: int, parameters: Parameters) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Evaluate the aggregated parameters"""
-        if parameters is None:
-            return 0, {"Aggregated mean age": []}
-        
-        agg_scalar = [arr.item() for arr in parameters_to_ndarrays(parameters)]
-        return 0, {"Aggregated mean age": agg_scalar}
-
+                
+        parameters = None
+        metrics = {'Aggregated MEAN AGE': aggregate_weightedavg_summarystat(results)}
+        return parameters, metrics
+    
     def configure_evaluate(self, server_round: int, parameters: Parameters, client_manager: ClientManager
                            ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure clients for evaluation (not used in analytics)"""
+        """Configure clients for evaluation (not used in FA)"""
+        pass
+
+    def evaluate(self, server_round: int, parameters: Parameters) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate the aggregated parameters (not used in FA)"""
         pass
 
     def aggregate_evaluate(self, server_round: int, results: List[Tuple[ClientProxy, EvaluateRes]], 
                            failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]
                            ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        """Aggregate evaluation results (not used in analytics)"""
+        """Aggregate evaluation results (not used in FA)"""
         pass
 
 # ============================================================================

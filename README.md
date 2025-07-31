@@ -24,14 +24,14 @@ Features
 - status = 0=alive without recurrence, 1=recurrence or death
 
 ## Federated Analytics (FA)
-To run the FA simulation: `python src/FedAnalytics/simulation.py`. By default, this returns the mean age of the patients in the dataset.
+To run the FA simulation: `python src/FA/simulation.py`. By default, this returns the mean age of the patients in the dataset.
 
 Currently the only summary statistic that can be computed is the mean.
 
 See `src/FedAnalytics/config.py` for the configuration parameters.
 
 ## Federated Learning (FL)
-To run the FL simulation: `python src/FedLearning/simulation.py`. By default, this runs logistic regression binary classification task to predict the `status` feature.
+To run the FL simulation: `python src/FL/simulation.py`. By default, this runs logistic regression binary classification task to predict the `status` feature.
 
 Currently the only model is logistic regression for classifying the status.
 
