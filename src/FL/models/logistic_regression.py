@@ -117,12 +117,11 @@ def create_log_reg_and_instantiate_parameters(penalty=None, epsilon=EPSILON, dat
     model = LogisticRegression(
         epsilon=epsilon,           # ← Now properly defined
         data_norm=data_norm,       # ← Now properly defined  
-        C=C,                     # Regularization (fixed)
-        max_iter=ITER_PER_ROUND,                # Client trains for one iteration
+        C=C,                       # Regularization (fixed)
+        max_iter=ITER_PER_ROUND,   # Client trains for one iteration
         warm_start=True,           # Prevent refreshing weights
         fit_intercept=True,        # Include bias term
-        verbose=0,                 # No verbose output
-        random_state=42            # Reproducible results
+        verbose=0                  # No verbose output
     )
     set_initial_params(model)
     return model

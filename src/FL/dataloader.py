@@ -41,7 +41,7 @@ def load_datasets(df, num_partitions: int, client_id: int):
 
     X_log = np.log1p(X)
 
-    X_train, X_test, y_train, y_test = train_test_split(X_log, y, test_size=0.3, random_state=42, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
     print(f'client ID: {client_id}, no. of training instances: {len(X_train)}')
     return X_train, X_test, y_train, y_test
 

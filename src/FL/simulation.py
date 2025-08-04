@@ -21,11 +21,11 @@ if __name__ == "__main__":
     )
 
 # Create filename base
-filename_base = f'logDP_federated_{MODEL_TYPE}_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}'
+filename_base = f'X_DP_federated_{MODEL_TYPE}_{NUM_CLIENTS}clients_eps{EPSILON}_datanorm{DATA_NORM}_C{C}_iterperround{ITER_PER_ROUND}'
 
 # Save individual arrays
-np.save(f'{filename_base}_accuracy.npy', test_acc)
-np.save(f'{filename_base}_loss.npy', test_loss)
+np.save(f'{filename_base}_accuracy555.npy', test_acc)
+np.save(f'{filename_base}_loss555.npy', test_loss)
 
 # ============================================================================
 # PLOT METRICS
